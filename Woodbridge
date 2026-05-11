@@ -1,0 +1,1733 @@
+import { useState, useMemo, useCallback, useEffect, useRef } from “react”;
+
+// ═══════════════════════════════════════════════════════════════
+// LOGO DATA  -  embedded exact images, no file paths needed
+// ═══════════════════════════════════════════════════════════════
+const NJ_LOGO_B64    = “data:image/png;base64,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”;
+const ADONI_LOGO_B64 = “data:image/png;base64,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”;
+
+// ═══════════════════════════════════════════════════════════════
+// BRANDING
+// ═══════════════════════════════════════════════════════════════
+const BRANDING = {
+ownerLogo:     ADONI_LOGO_B64,  // Adoni Property Group — exact image as provided
+installerLogo: NJ_LOGO_B64,     // Woodwork NJ — exact image as provided
+ownerName:     “Adoni Property Group”,
+installerName: “Woodwork NJ”,
+projectName:   “Fulton & Main”,
+location:      “Woodbridge, NJ”,
+appName:       “Millwork Logistics”,
+};
+
+// ═══════════════════════════════════════════════════════════════
+// DESIGN TOKENS  -  unchanged
+// ═══════════════════════════════════════════════════════════════
+const C = {
+bg:          “#F1F0EC”,
+surface:     “#FFFFFF”,
+surfaceWarm: “#F8F7F3”,
+border:      “#DDD9CE”,
+borderMid:   “#C4BFB0”,
+text:        “#131210”,
+textMid:     “#46433A”,
+textLight:   “#8A8778”,
+fDisplay:    “‘Plus Jakarta Sans’, system-ui, sans-serif”,
+fBody:       “‘Plus Jakarta Sans’, system-ui, sans-serif”,
+fMono:       “‘DM Mono’, ‘Courier New’, monospace”,
+};
+
+// ═══════════════════════════════════════════════════════════════
+// FLOOR DATA  -  exactly 90 residential units
+// Ground=0, Second=18, Third=30, Fourth=30, Fifth=12
+// ═══════════════════════════════════════════════════════════════
+const FLOORS = [
+{
+id:1, num:“1”, label:“Ground”, short:“G”,
+color:”#6B7280”, light:”#F3F4F6”, dark:”#1F2937”, colorName:“Gray”,
+drawing:“A-101”,
+units:[],
+notes:“Lobby · Retail 101R · Mail Rm · Package Rm · Parking · Common Areas”,
+},
+{
+id:2, num:“2”, label:“Second”, short:“2”,
+color:”#2563EB”, light:”#DBEAFE”, dark:”#1E3A8A”, colorName:“Blue”,
+drawing:“A-102”,
+units:[201,202,203,204,205,206,207,208,209,210,211,212,213,214,215,216,217,218],
+notes:“18 units · Gym · Elevator Vestibule · Corridor”,
+},
+{
+id:3, num:“3”, label:“Third”, short:“3”,
+color:”#16A34A”, light:”#DCFCE7”, dark:”#14532D”, colorName:“Green”,
+drawing:“A-103”,
+units:[301,302,303,304,305,306,307,308,309,310,311,312,313,314,315,
+316,317,318,319,320,321,322,323,324,325,326,327,328,329,330],
+notes:“30 units · Stair A & B · Elevator Lobby · Corridor”,
+},
+{
+id:4, num:“4”, label:“Fourth”, short:“4”,
+color:”#EA580C”, light:”#FFEDD5”, dark:”#7C2D12”, colorName:“Orange”,
+drawing:“A-105”,
+units:[401,402,403,404,405,406,407,408,409,410,411,412,413,414,415,
+416,417,418,419,420,421,422,423,424,425,426,427,428,429,430],
+notes:“30 units · Stair A & B · Elevator Lobby · Corridor · Trash Rm”,
+},
+{
+id:5, num:“5”, label:“Fifth”, short:“5”,
+color:”#DC2626”, light:”#FEE2E2”, dark:”#7F1D1D”, colorName:“Red”,
+drawing:“A-106”,
+units:[501,502,503,504,505,506,507,508,509,510,511,512],
+notes:“12 units · Amenity Deck · Pool · Lounge · Storage”,
+},
+];
+
+const RESIDENTIAL_FLOORS = FLOORS.filter(f => f.units.length > 0);
+const TOTAL_UNITS = FLOORS.reduce((s, f) => s + f.units.length, 0); // 90
+
+// ═══════════════════════════════════════════════════════════════
+// UNIT POSITIONS on floor plan schematic (SVG viewBox 0 0 1000 180)
+// ═══════════════════════════════════════════════════════════════
+const UNIT_POS = {
+2:[
+{id:201,x:52,y:142},{id:202,x:115,y:32},{id:203,x:188,y:32},{id:204,x:261,y:32},
+{id:205,x:334,y:32},{id:206,x:407,y:32},{id:207,x:480,y:32},{id:208,x:553,y:32},
+{id:209,x:626,y:32},{id:210,x:699,y:32},
+{id:211,x:115,y:142},{id:212,x:188,y:142},{id:213,x:261,y:142},{id:214,x:334,y:142},
+{id:215,x:407,y:142},{id:216,x:480,y:142},{id:217,x:553,y:142},{id:218,x:626,y:142},
+],
+3:[
+{id:302,x:100,y:32},{id:303,x:163,y:32},{id:304,x:226,y:32},{id:305,x:289,y:32},
+{id:306,x:352,y:32},{id:307,x:415,y:32},{id:308,x:478,y:32},{id:309,x:541,y:32},
+{id:310,x:604,y:32},{id:311,x:667,y:32},{id:312,x:730,y:32},{id:313,x:793,y:32},
+{id:314,x:856,y:32},{id:315,x:919,y:32},
+{id:301,x:48,y:142},
+{id:316,x:100,y:142},{id:317,x:163,y:142},{id:318,x:226,y:142},{id:319,x:289,y:142},
+{id:320,x:352,y:142},{id:321,x:415,y:142},{id:322,x:478,y:142},{id:323,x:541,y:142},
+{id:324,x:604,y:142},{id:325,x:667,y:142},{id:326,x:730,y:142},{id:327,x:793,y:142},
+{id:328,x:856,y:142},{id:329,x:919,y:142},{id:330,x:970,y:87},
+],
+4:[
+{id:402,x:100,y:32},{id:403,x:163,y:32},{id:404,x:226,y:32},{id:405,x:289,y:32},
+{id:406,x:352,y:32},{id:407,x:415,y:32},{id:408,x:478,y:32},{id:409,x:541,y:32},
+{id:410,x:604,y:32},{id:411,x:667,y:32},{id:412,x:730,y:32},{id:413,x:793,y:32},
+{id:414,x:856,y:32},{id:415,x:919,y:32},
+{id:401,x:48,y:142},
+{id:416,x:100,y:142},{id:417,x:163,y:142},{id:418,x:226,y:142},{id:419,x:289,y:142},
+{id:420,x:352,y:142},{id:421,x:415,y:142},{id:422,x:478,y:142},{id:423,x:541,y:142},
+{id:424,x:604,y:142},{id:425,x:667,y:142},{id:426,x:730,y:142},{id:427,x:793,y:142},
+{id:428,x:856,y:142},{id:429,x:919,y:142},{id:430,x:970,y:87},
+],
+5:[
+{id:501,x:335,y:36},{id:502,x:415,y:36},{id:503,x:495,y:36},
+{id:504,x:575,y:36},{id:505,x:655,y:36},{id:506,x:735,y:36},
+{id:507,x:335,y:142},{id:508,x:415,y:142},{id:509,x:495,y:142},
+{id:510,x:575,y:142},{id:511,x:655,y:142},{id:512,x:735,y:142},
+],
+};
+
+// ─── Runtime validation (fires once on load, safe in all environments) ───────
+(() => {
+if (TOTAL_UNITS !== 90)
+console.warn(“⚠ Unit count mismatch: expected 90, got “ + TOTAL_UNITS);
+RESIDENTIAL_FLOORS.forEach(f => {
+const posIds   = new Set((UNIT_POS[f.id]||[]).map(p=>p.id));
+const floorIds = new Set(f.units);
+const missingPos = […floorIds].filter(u=>!posIds.has(u));
+const extraPos   = […posIds].filter(u=>!floorIds.has(u));
+if (missingPos.length)
+console.warn(“⚠ Floor “+f.id+”: units without markers:”, missingPos);
+if (extraPos.length)
+console.warn(“⚠ Floor “+f.id+”: markers without units:”, extraPos);
+});
+const totalMarkers = Object.values(UNIT_POS).reduce((s,a)=>s+a.length,0);
+if (totalMarkers !== 90)
+console.warn(“⚠ Marker count: expected 90, got “+totalMarkers);
+})();
+
+// ═══════════════════════════════════════════════════════════════
+// STATUS CONFIG
+// ═══════════════════════════════════════════════════════════════
+const STATUSES = {
+pending:   { label:“Pending”,          short:“PEND”, color:”#9A9888”, bg:”#F1F0EC”, dot:“○” },
+staged:    { label:“Staged”,           short:“STGD”, color:”#0E7490”, bg:”#ECFEFF”, dot:“◎” },
+delivered: { label:“Delivered”,        short:“DLVD”, color:”#B45309”, bg:”#FEF3C7”, dot:“◉” },
+installed: { label:“Installed”,        short:“INST”, color:”#15803D”, bg:”#DCFCE7”, dot:“●” },
+missing:   { label:“Missing Material”, short:“MISS”, color:”#DC2626”, bg:”#FEE2E2”, dot:“◻” },
+punch:     { label:“Punch List”,       short:“PNCH”, color:”#7C3AED”, bg:”#EDE9FE”, dot:“△” },
+};
+
+// ═══════════════════════════════════════════════════════════════
+// MILLWORK CATALOGUE  -  7 categories, 38 items
+// ═══════════════════════════════════════════════════════════════
+const MILLWORK = {
+“Kitchen”: [
+{ id:“KIT-UC”, label:“Upper Cabinets”,        phase:1 },
+{ id:“KIT-BC”, label:“Base Cabinets”,          phase:1 },
+{ id:“KIT-TC”, label:“Tall Cabinet / Pantry”,  phase:1 },
+{ id:“KIT-IC”, label:“Island Cabinet”,         phase:1 },
+{ id:“KIT-FP”, label:“Filler Panels”,          phase:1 },
+{ id:“KIT-EP”, label:“End Panels”,             phase:1 },
+{ id:“KIT-TK”, label:“Toe Kick”,               phase:1 },
+{ id:“KIT-HW”, label:“Hardware Box”,           phase:1 },
+],
+“Closets”: [
+{ id:“CL-LS”,  label:“Left Side Panel”,        phase:2 },
+{ id:“CL-RS”,  label:“Right Side Panel”,       phase:2 },
+{ id:“CL-BW”,  label:“Back Wall”,              phase:2 },
+{ id:“CL-WIC”, label:“Walk-In System”,         phase:2 },
+{ id:“CL-LN”,  label:“Linen Shelves”,          phase:2 },
+{ id:“CL-UT”,  label:“Utility / Laundry”,      phase:2 },
+{ id:“CL-HW”,  label:“Hardware Box”,           phase:2 },
+],
+“Vanities”: [
+{ id:“VAN-MV”, label:“Master Vanity”,          phase:2 },
+{ id:“VAN-GV”, label:“Guest Bath Vanity”,      phase:2 },
+{ id:“VAN-PV”, label:“Powder Room Vanity”,     phase:2 },
+{ id:“VAN-FP”, label:“Vanity Filler Panel”,    phase:2 },
+{ id:“VAN-HW”, label:“Vanity Hardware Box”,    phase:2 },
+],
+“Countertops”: [
+{ id:“CT-KT”,  label:“Kitchen Countertop”,     phase:2 },
+{ id:“CT-KI”,  label:“Island Countertop”,      phase:2 },
+{ id:“CT-BV”,  label:“Bath Vanity Top”,        phase:2 },
+{ id:“CT-MV”,  label:“Master Vanity Top”,      phase:2 },
+{ id:“CT-BS”,  label:“Backsplash”,             phase:2 },
+],
+“Hardware”: [
+{ id:“HW-KT”,  label:“Kitchen Hardware Box”,   phase:1 },
+{ id:“HW-CL”,  label:“Closet Hardware Box”,    phase:2 },
+{ id:“HW-VN”,  label:“Vanity Hardware Box”,    phase:2 },
+{ id:“HW-UN”,  label:“Unit Hardware Box”,      phase:1 },
+],
+“Panels & Fillers”: [
+{ id:“PF-DP”,  label:“Decorative Panel”,       phase:3 },
+{ id:“PF-FP”,  label:“Filler Panel”,           phase:3 },
+{ id:“PF-EP”,  label:“End Panel”,              phase:3 },
+],
+“Shelving & Trim”: [
+{ id:“ST-SH”,  label:“Shelving”,               phase:3 },
+{ id:“ST-TR”,  label:“Trim / Scribe”,          phase:3 },
+{ id:“ST-TK”,  label:“Toe Kick”,               phase:3 },
+],
+};
+
+const ALL_ITEMS = Object.entries(MILLWORK).flatMap(([cat,items]) =>
+items.map(i => ({ …i, cat }))
+);
+
+const PHASES = {
+1:{ label:“Phase 1”, desc:“Rough-In / Cabinet Install”,    color:”#6D28D9” },
+2:{ label:“Phase 2”, desc:“Finish / Countertop / Vanity”,  color:”#0E7490” },
+3:{ label:“Phase 3”, desc:“Trim & Punch-Out”,              color:”#92400E” },
+};
+
+// ═══════════════════════════════════════════════════════════════
+// HELPERS  -  defined outside App() so they are never recreated
+// ═══════════════════════════════════════════════════════════════
+const buildCode = (floorNum, unitId, itemId, seq) =>
+`F${floorNum}-U${unitId}-${itemId}-${String(seq).padStart(3,"0")}`;
+
+// Only search residential floors to avoid iterating Ground (units:[])
+const floorOfUnit = id => RESIDENTIAL_FLOORS.find(f => f.units.includes(id));
+
+// inputSt defined outside App so it is never recreated on re-render
+const INPUT_ST = {
+fontSize:15, border:`1.5px solid ${C.border}`, borderRadius:12,
+padding:“11px 14px”, backgroundColor:C.surface, fontFamily:C.fBody,
+color:C.text, width:“100%”, boxSizing:“border-box”, outline:“none”,
+};
+
+// Section title helper  -  pure function, defined outside App
+const SectionTitle = ({ text }) => (
+
+  <div style={{
+    fontSize:11, fontWeight:700, letterSpacing:"0.2em", textTransform:"uppercase",
+    color:C.textLight, fontFamily:C.fMono, marginBottom:12,
+  }}>{text}</div>
+);
+
+// ═══════════════════════════════════════════════════════════════
+// LOGO SLOT
+
+// useState is always called unconditionally before any return.
+// ═══════════════════════════════════════════════════════════════
+const LOGO_H = 44;
+const LOGO_W = 96;
+
+function LogoSlot({ src, name }) {
+
+const [err, setErr] = useState(false);
+
+const wrapper = child => (
+<div style={{
+width: LOGO_W, height: LOGO_H, flexShrink:0,
+display:“flex”, alignItems:“center”, justifyContent:“center”,
+overflow:“hidden”,
+}}>
+{child}
+</div>
+);
+
+if (src && !err) {
+return wrapper(
+<img
+src={src}
+alt={name}
+onError={() => setErr(true)}
+style={{ maxHeight:LOGO_H, maxWidth:LOGO_W, objectFit:“contain”, display:“block” }}
+/>
+);
+}
+
+const nameLines = name.split(” “).map((word, i) => (
+<span key={i} style={{ display:“block” }}>{word}</span>
+));
+
+return wrapper(
+<div style={{
+width:LOGO_W, height:LOGO_H, borderRadius:10,
+border:`1.5px dashed ${C.borderMid}`,
+display:“flex”, flexDirection:“column”,
+alignItems:“center”, justifyContent:“center”,
+gap:3, padding:“0 8px”,
+}}>
+<span style={{
+fontSize:7.5, fontWeight:800, letterSpacing:“0.1em”, color:C.textLight,
+fontFamily:C.fMono, textTransform:“uppercase”, textAlign:“center”, lineHeight:1.35,
+}}>
+{nameLines}
+</span>
+<span style={{ fontSize:7, color:C.borderMid, fontFamily:C.fMono }}>LOGO</span>
+</div>
+);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FLOOR SCHEMATIC BACKGROUND
+
+// ═══════════════════════════════════════════════════════════════
+function FloorSchematic({ floor }) {
+const c = floor.color, isFifth = floor.id === 5;
+
+const svgStyle = {
+position:“absolute”, top:0, right:0, bottom:0, left:0,
+width:“100%”, height:“100%”,
+};
+return (
+<svg viewBox="0 0 1000 180" preserveAspectRatio="xMidYMid meet" style={svgStyle}>
+<rect width="1000" height="180" fill={floor.light} opacity="0.3"/>
+{[100,200,300,400,500,600,700,800,900].map(x=>(
+<line key={x} x1={x} y1="0" x2={x} y2="180"
+stroke={c} strokeWidth="0.5" opacity="0.1"/>
+))}
+<line x1="0" y1="90" x2="1000" y2="90"
+stroke={c} strokeWidth="0.7" strokeDasharray="14,6" opacity="0.18"/>
+{isFifth ? (
+<>
+<rect x="8" y="8" width="290" height="164" rx="5" fill={c}
+opacity="0.05" stroke={c} strokeWidth="1.2" strokeDasharray="8,4"/>
+<text x="153" y="85" textAnchor="middle" fontSize="10" fill={c} opacity="0.35"
+fontFamily="DM Mono,monospace" letterSpacing="2">AMENITY</text>
+<text x="153" y="100" textAnchor="middle" fontSize="10" fill={c} opacity="0.35"
+fontFamily="DM Mono,monospace" letterSpacing="2">DECK</text>
+<rect x="310" y="8" width="682" height="164" rx="5" fill="white"
+opacity="0.4" stroke={c} strokeWidth="1.4"/>
+</>
+) : (
+<rect x="8" y="8" width="984" height="164" rx="5" fill="white"
+opacity="0.4" stroke={c} strokeWidth="1.4"/>
+)}
+<rect x={isFifth?592:560} y="66" width="56" height="48" rx="4"
+fill={c} opacity="0.07" stroke={c} strokeWidth="0.8"/>
+<text x={isFifth?620:588} y="88" textAnchor="middle" fontSize="7.5"
+fill={c} opacity="0.38" fontFamily="DM Mono,monospace" letterSpacing="1">STAIR</text>
+<text x={isFifth?620:588} y="100" textAnchor="middle" fontSize="7.5"
+fill={c} opacity="0.38" fontFamily="DM Mono,monospace" letterSpacing="1">ELEV</text>
+<text x="990" y="173" textAnchor="end" fontSize="8.5" fill={c} opacity="0.28"
+fontFamily="DM Mono,monospace" letterSpacing="1.5">
+{floor.drawing} · FLOOR {floor.num}
+</text>
+</svg>
+);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// UNIT MARKER
+
+// ═══════════════════════════════════════════════════════════════
+function UnitMarker({ unit, floor, status, selected, onClick }) {
+const filled  = status === “installed”;
+const dotColor = {
+installed:”#15803D”, missing:”#DC2626”, delivered:”#B45309”,
+staged:”#0E7490”, punch:”#7C3AED”,
+}[status] || “#9A9888”;
+
+return (
+<g
+transform={`translate(${unit.x},${unit.y})`}
+onClick={() => onClick(unit.id)}
+onKeyDown={e => { if (e.key === “Enter” || e.key === “ “) onClick(unit.id); }}
+role=“button”
+aria-label={`Unit ${unit.id} — ${STATUSES[status]?.label || "Pending"}`}
+tabIndex={0}
+style={{ cursor:“pointer”, outline:“none” }}
+>
+{selected && (
+<circle r="21" fill="none" stroke={floor.color} strokeWidth="2.5" opacity="0.45">
+<animate attributeName="r" values="19;24;19" dur="2s" repeatCount="indefinite"/>
+<animate attributeName="opacity" values="0.45;0.1;0.45" dur="2s" repeatCount="indefinite"/>
+</circle>
+)}
+<rect
+x=”-24” y=”-16” width=“48” height=“32” rx=“8”
+fill={filled ? floor.color : selected ? floor.color : floor.light}
+stroke={floor.color}
+strokeWidth={selected||filled ? 0 : status===“missing” ? 2.2 : 1.8}
+strokeDasharray={status===“missing” ? “3,2” : “none”}
+opacity=“0.97”
+/>
+<text textAnchor=“middle” y=“6” fontSize=“12”
+fontFamily=“Plus Jakarta Sans, system-ui” fontWeight=“800”
+letterSpacing=”-0.3”
+fill={filled||selected ? “white” : floor.dark}>
+{unit.id}
+</text>
+<circle cx="20" cy="-13" r="5.5" fill={dotColor} stroke="white" strokeWidth="1.5"/>
+</g>
+);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FLOOR PLAN CANVAS
+
+// ═══════════════════════════════════════════════════════════════
+function FloorPlanCanvas({ floor, unitData, selectedUnit, onSelect }) {
+const positions = UNIT_POS[floor.id] || [];
+
+const svgStyle = {
+position:“absolute”, top:0, right:0, bottom:0, left:0,
+width:“100%”, height:“100%”,
+};
+return (
+<div style={{
+position:“relative”, width:“100%”, paddingBottom:“18%”, minHeight:165,
+borderRadius:18, overflow:“hidden”,
+border:`1.5px solid ${floor.color}28`,
+}}>
+<FloorSchematic floor={floor}/>
+<svg viewBox=“0 0 1000 180” style={svgStyle} aria-label={`${floor.label} Floor plan`}>
+{positions.map(pos => (
+<UnitMarker
+key={pos.id}
+unit={pos}
+floor={floor}
+status={(unitData[pos.id]||{}).overall||“pending”}
+selected={selectedUnit===pos.id}
+onClick={onSelect}
+/>
+))}
+</svg>
+</div>
+);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FLOOR BADGE
+// ═══════════════════════════════════════════════════════════════
+function Badge({ floor, size=“md” }) {
+const dim = {sm:34, md:42, lg:50}[size] || 42;
+const fs  = {sm:14, md:16, lg:20}[size] || 16;
+return (
+<div style={{
+width:dim, height:dim, borderRadius:10, flexShrink:0,
+backgroundColor:floor.color, display:“flex”, alignItems:“center”,
+justifyContent:“center”, fontFamily:C.fDisplay, fontWeight:800,
+fontSize:fs, color:“white”, letterSpacing:”-0.3px”,
+}}>
+{floor.short}
+</div>
+);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// STATUS CHIP
+// ═══════════════════════════════════════════════════════════════
+function StatusChip({ statusKey, large }) {
+const s = STATUSES[statusKey] || STATUSES.pending;
+return (
+<span style={{
+fontSize: large ? 13 : 11, fontWeight:700,
+padding: large ? “5px 12px” : “3px 8px”,
+borderRadius:8, fontFamily:C.fDisplay,
+color:s.color, backgroundColor:s.bg,
+whiteSpace:“nowrap”, flexShrink:0,
+}}>
+{s.dot} {large ? s.label : s.short}
+</span>
+);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// UNIT DRAWER
+
+//             state on unit change  -  notes, tab, selCat all fresh.
+// ═══════════════════════════════════════════════════════════════
+function UnitDrawer({ unitId, floor, data, onUpdate, onClose }) {
+const [tab, setTab]             = useState(“overview”);
+const [selCat, setSelCat]       = useState(“Kitchen”);
+const [notes, setNotes]         = useState(data.notes || “”);
+const [editNotes, setEditNotes] = useState(false);
+
+useEffect(() => {
+setNotes(data.notes || “”);
+}, [data.notes]);
+
+const items     = data.items || {};
+const overall   = data.overall || “pending”;
+const overallSt = STATUSES[overall] || STATUSES.pending;
+const doneCount = ALL_ITEMS.filter(i => items[i.id] === “installed”).length;
+const pct       = Math.round((doneCount / ALL_ITEMS.length) * 100);
+const catItems  = MILLWORK[selCat] || [];
+const catDone   = catItems.filter(i => items[i.id] === “installed”).length;
+
+const setItem    = (id, val) => onUpdate({ …data, items:{ …items, [id]:val } });
+const setOverall = val       => onUpdate({ …data, overall:val });
+
+const TABS = [
+{ id:“overview”, label:“Status”    },
+{ id:“items”,    label:“Checklist” },
+{ id:“label”,    label:“Labels”    },
+];
+
+return (
+<div style={{
+display:“flex”, flexDirection:“column”, height:“100%”,
+backgroundColor:C.surface, fontFamily:C.fBody,
+}}>
+
+```
+  {/* ── Header ── */}
+  <div style={{ flexShrink:0, borderBottom:`3px solid ${floor.color}`, backgroundColor:floor.light }}>
+    <div style={{ padding:"20px 20px 14px" }}>
+      <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", gap:8 }}>
+        <div style={{ flex:1 }}>
+          <div style={{ fontSize:11, fontWeight:700, letterSpacing:"0.2em",
+                        textTransform:"uppercase", color:floor.color,
+                        fontFamily:C.fMono, marginBottom:5 }}>
+            {floor.label} Floor · {floor.drawing}
+          </div>
+          <div style={{ fontSize:40, fontWeight:800, lineHeight:1, color:floor.dark,
+                        fontFamily:C.fDisplay, letterSpacing:"-1px" }}>
+            Unit {unitId}
+          </div>
+          <div style={{ display:"flex", alignItems:"center", flexWrap:"wrap", gap:8, marginTop:10 }}>
+            <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+              <div style={{ width:12, height:12, borderRadius:"50%", backgroundColor:floor.color }}/>
+              <span style={{ fontSize:14, fontWeight:600, color:C.textMid }}>
+                {floor.colorName} — Floor {floor.num}
+              </span>
+            </div>
+            <StatusChip statusKey={overall} large/>
+          </div>
+        </div>
+        
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close unit drawer"
+          style={{
+            width:38, height:38, borderRadius:"50%",
+            border:`1.5px solid ${C.border}`,
+            display:"flex", alignItems:"center", justifyContent:"center",
+            fontSize:17, fontWeight:700, color:C.textMid,
+            backgroundColor:"transparent", cursor:"pointer", flexShrink:0,
+          }}
+        >✕</button>
+      </div>
+      {/* Progress bar */}
+      <div style={{ marginTop:16 }}>
+        <div style={{ display:"flex", justifyContent:"space-between", marginBottom:5 }}>
+          <span style={{ fontSize:11, fontWeight:700, letterSpacing:"0.16em",
+                         textTransform:"uppercase", color:C.textLight, fontFamily:C.fMono }}>
+            Completion
+          </span>
+          <span style={{ fontSize:13, fontWeight:700, color:floor.color, fontFamily:C.fMono }}>
+            {doneCount}/{ALL_ITEMS.length} · {pct}%
+          </span>
+        </div>
+        <div style={{ height:6, borderRadius:6, backgroundColor:floor.color+"22", overflow:"hidden" }}>
+          <div style={{
+            height:"100%", width:`${pct}%`, backgroundColor:floor.color,
+            borderRadius:6, transition:"width 0.5s",
+          }}/>
+        </div>
+      </div>
+    </div>
+    {/* Tabs */}
+    <div style={{ display:"flex", borderTop:`1px solid ${floor.color}28` }}>
+      {TABS.map(t => (
+        <button
+          key={t.id}
+          type="button"
+          onClick={() => setTab(t.id)}
+          style={{
+            flex:1, padding:"12px 0", fontSize:13, fontWeight:700,
+            letterSpacing:"0.04em", fontFamily:C.fDisplay,
+            cursor:"pointer", border:"none",
+            color: tab===t.id ? floor.color : C.textLight,
+            backgroundColor: tab===t.id ? "rgba(255,255,255,0.55)" : "transparent",
+            borderBottom: `3px solid ${tab===t.id ? floor.color : "transparent"}`,
+            transition:"all 0.15s",
+          }}
+        >{t.label}</button>
+      ))}
+    </div>
+  </div>
+
+  {/* ── Scrollable Body ── */}
+  <div style={{ flex:1, overflowY:"auto", backgroundColor:C.bg }}>
+
+    {/* STATUS */}
+    {tab === "overview" && (
+      <div style={{ padding:"18px 18px 24px" }}>
+        <div style={{ fontSize:11, fontWeight:700, letterSpacing:"0.18em",
+                      textTransform:"uppercase", color:C.textLight,
+                      fontFamily:C.fMono, marginBottom:12 }}>Overall Status</div>
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:8, marginBottom:22 }}>
+          {Object.entries(STATUSES).map(([key, s]) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setOverall(key)}
+              aria-pressed={overall === key}
+              style={{
+                display:"flex", flexDirection:"column", alignItems:"center",
+                gap:5, padding:"14px 4px", borderRadius:14, cursor:"pointer",
+                border:`2px solid ${overall===key ? floor.color : C.border}`,
+                backgroundColor: overall===key ? floor.light : C.surface,
+                transition:"all 0.15s",
+              }}
+            >
+              <span style={{ fontSize:22, color:overall===key?floor.color:C.textLight, lineHeight:1 }}>
+                {s.dot}
+              </span>
+              <span style={{ fontSize:10, fontWeight:700, textAlign:"center", lineHeight:1.4,
+                             color:overall===key?floor.dark:C.textMid, fontFamily:C.fMono }}>
+                {s.label}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        <div style={{ height:1, backgroundColor:C.border, marginBottom:20 }}/>
+
+        <div style={{ fontSize:11, fontWeight:700, letterSpacing:"0.18em",
+                      textTransform:"uppercase", color:C.textLight,
+                      fontFamily:C.fMono, marginBottom:12 }}>Category Progress</div>
+        <div style={{ display:"flex", flexDirection:"column", gap:9 }}>
+          {Object.entries(MILLWORK).map(([cat, catI]) => {
+            const done = catI.filter(i => items[i.id] === "installed").length;
+            const miss = catI.filter(i => items[i.id] === "missing").length;
+            const p = Math.round(done / catI.length * 100);
+            return (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => { setSelCat(cat); setTab("items"); }}
+                style={{
+                  display:"flex", alignItems:"center", gap:12,
+                  padding:"13px 15px", borderRadius:14,
+                  border:`1.5px solid ${C.border}`,
+                  backgroundColor:C.surface, cursor:"pointer", textAlign:"left",
+                }}
+              >
+                <div style={{ flex:1 }}>
+                  <div style={{ display:"flex", justifyContent:"space-between",
+                                alignItems:"center", marginBottom:6 }}>
+                    <span style={{ fontSize:15, fontWeight:700, color:C.text }}>{cat}</span>
+                    <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                      {miss > 0 && (
+                        <span style={{ fontSize:12, fontWeight:700, color:"#DC2626", fontFamily:C.fMono }}>
+                          ◻ {miss}
+                        </span>
+                      )}
+                      <span style={{ fontSize:12, fontWeight:700, color:floor.color, fontFamily:C.fMono }}>
+                        {done}/{catI.length}
+                      </span>
+                    </div>
+                  </div>
+                  <div style={{ height:4, borderRadius:4, backgroundColor:floor.color+"18", overflow:"hidden" }}>
+                    <div style={{ height:"100%", width:`${p}%`, backgroundColor:floor.color, borderRadius:4 }}/>
+                  </div>
+                </div>
+                <span style={{ fontSize:18, color:C.textLight }}>›</span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div style={{ height:1, backgroundColor:C.border, margin:"20px 0" }}/>
+
+        <div style={{ fontSize:11, fontWeight:700, letterSpacing:"0.18em",
+                      textTransform:"uppercase", color:C.textLight,
+                      fontFamily:C.fMono, marginBottom:12 }}>Notes / Issues</div>
+        {editNotes ? (
+          <div>
+            <textarea
+              value={notes}
+              onChange={e => setNotes(e.target.value)}
+              rows={4}
+              placeholder="Site notes, damage reports, missing items..."
+              aria-label="Unit notes"
+              style={{
+                width:"100%", fontSize:15, border:`1.5px solid ${floor.color}`,
+                borderRadius:12, padding:"13px 15px", resize:"none", outline:"none",
+                fontFamily:C.fBody, color:C.text, backgroundColor:C.surface,
+                boxSizing:"border-box", lineHeight:1.5,
+              }}
+            />
+            <div style={{ display:"flex", gap:8, marginTop:8 }}>
+              <button
+                type="button"
+                onClick={() => { onUpdate({ ...data, notes }); setEditNotes(false); }}
+                style={{
+                  fontSize:14, fontWeight:700, padding:"9px 20px", borderRadius:10,
+                  backgroundColor:floor.color, color:"white", border:"none", cursor:"pointer",
+                }}
+              >Save</button>
+              <button
+                type="button"
+                onClick={() => setEditNotes(false)}
+                style={{
+                  fontSize:14, fontWeight:700, padding:"9px 18px", borderRadius:10,
+                  border:`1.5px solid ${C.border}`, color:C.textMid,
+                  backgroundColor:"transparent", cursor:"pointer",
+                }}
+              >Cancel</button>
+            </div>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setEditNotes(true)}
+            aria-label="Add or edit notes"
+            style={{
+              width:"100%", textAlign:"left", fontSize:15, padding:"13px 15px",
+              borderRadius:12, border:`1.5px solid ${C.border}`,
+              backgroundColor:C.surface, cursor:"pointer", lineHeight:1.5,
+              color: data.notes ? C.text : C.textLight, fontFamily:C.fBody,
+            }}
+          >
+            {data.notes || "Tap to add field notes or flag issues..."}
+          </button>
+        )}
+      </div>
+    )}
+
+    {/* CHECKLIST */}
+    {tab === "items" && (
+      <div>
+        
+        <div className="hide-scroll" style={{
+          display:"flex", gap:7, padding:"14px 16px 10px",
+          overflowX:"auto", scrollbarWidth:"none",
+        }}>
+          {Object.keys(MILLWORK).map(cat => (
+            <button
+              key={cat}
+              type="button"
+              onClick={() => setSelCat(cat)}
+              style={{
+                flexShrink:0, fontSize:13, fontWeight:700,
+                padding:"8px 15px", borderRadius:20,
+                fontFamily:C.fDisplay, cursor:"pointer",
+                border:`1.5px solid ${selCat===cat ? floor.color : C.border}`,
+                backgroundColor: selCat===cat ? floor.color : C.surface,
+                color: selCat===cat ? "white" : C.textMid,
+                transition:"all 0.15s",
+              }}
+            >{cat}</button>
+          ))}
+        </div>
+        <div style={{ display:"flex", justifyContent:"space-between",
+                      alignItems:"center", padding:"0 18px 12px" }}>
+          <span style={{ fontSize:18, fontWeight:700, color:C.text }}>{selCat}</span>
+          <span style={{ fontSize:13, fontWeight:700, color:floor.color, fontFamily:C.fMono }}>
+            {catDone}/{catItems.length} installed
+          </span>
+        </div>
+        <div style={{ padding:"0 14px 80px", display:"flex", flexDirection:"column", gap:8 }}>
+          {catItems.map((item, idx) => {
+            const st    = items[item.id] || "pending";
+            const stObj = STATUSES[st] || STATUSES.pending;
+            const ph    = PHASES[item.phase];
+            const code  = buildCode(floor.num, unitId, item.id, idx+1);
+            const barColor = {
+              installed:"#15803D", missing:"#DC2626", punch:"#7C3AED",
+              delivered:"#B45309", staged:"#0E7490",
+            }[st] || C.border;
+            return (
+              <div key={item.id} style={{
+                borderRadius:14, overflow:"hidden",
+                border:`1.5px solid ${C.border}`, backgroundColor:C.surface,
+              }}>
+                <div style={{ display:"flex", alignItems:"center", gap:12, padding:"13px 14px" }}>
+                  <div style={{
+                    width:38, height:38, borderRadius:10, flexShrink:0,
+                    display:"flex", alignItems:"center", justifyContent:"center",
+                    fontSize:18, fontWeight:700,
+                    backgroundColor:stObj.bg, color:stObj.color,
+                  }}>
+                    {stObj.dot}
+                  </div>
+                  <div style={{ flex:1, minWidth:0 }}>
+                    <div style={{ fontSize:16, fontWeight:700, color:C.text, marginBottom:4 }}>
+                      {item.label}
+                    </div>
+                    <div style={{ display:"flex", alignItems:"center", gap:7 }}>
+                      <span style={{
+                        fontSize:10, fontWeight:700, padding:"2px 7px", borderRadius:5,
+                        backgroundColor:ph.color+"18", color:ph.color, fontFamily:C.fMono,
+                      }}>{ph.label}</span>
+                      <span style={{ fontSize:10, color:C.textLight, fontFamily:C.fMono }}>{code}</span>
+                    </div>
+                  </div>
+                  
+                  <select
+                    value={st}
+                    onChange={e => setItem(item.id, e.target.value)}
+                    aria-label={`Status for ${item.label}`}
+                    style={{
+                      fontSize:12, fontWeight:700, padding:"7px 8px", borderRadius:9,
+                      border:`1.5px solid ${C.border}`, color:stObj.color,
+                      backgroundColor:stObj.bg, fontFamily:C.fMono,
+                      cursor:"pointer", flexShrink:0,
+                    }}
+                  >
+                    {Object.entries(STATUSES).map(([k, s]) => (
+                      <option key={k} value={k}>{s.short}</option>
+                    ))}
+                  </select>
+                </div>
+                <div style={{ height:3, backgroundColor:barColor }}/>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    )}
+
+    {/* LABELS */}
+    {tab === "label" && (
+      <div style={{ padding:"18px 18px 80px" }}>
+        <div style={{ fontSize:12, fontWeight:700, letterSpacing:"0.18em",
+                      textTransform:"uppercase", color:C.textLight,
+                      fontFamily:C.fMono, marginBottom:14 }}>
+          Field Labels — Unit {unitId}
+        </div>
+        {/* Master label */}
+        <div style={{
+          borderRadius:16, overflow:"hidden",
+          border:`2.5px solid ${floor.color}`, marginBottom:20,
+        }}>
+          <div style={{
+            backgroundColor:floor.color, padding:"11px 18px",
+            textAlign:"center", color:"white", fontFamily:C.fMono,
+            fontWeight:700, fontSize:13, letterSpacing:"0.15em",
+          }}>
+            ▬ {floor.label.toUpperCase()} FLOOR — {floor.colorName.toUpperCase()} ▬
+          </div>
+          <div style={{ backgroundColor:C.surface, padding:"16px 20px" }}>
+            <div style={{ fontSize:44, fontWeight:800, textAlign:"center",
+                          fontFamily:C.fDisplay, color:C.text, lineHeight:1 }}>
+              UNIT {unitId}
+            </div>
+            <div style={{ textAlign:"center", fontSize:14, color:C.textMid,
+                          margin:"6px 0 4px", fontWeight:600 }}>
+              {floor.label} Floor · {floor.drawing}
+            </div>
+            <div style={{
+              borderTop:`1px dashed ${C.border}`, marginTop:12, paddingTop:10,
+              display:"flex", justifyContent:"space-between", alignItems:"center",
+              flexWrap:"wrap", gap:6,
+            }}>
+              <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+                <div style={{ width:14, height:14, borderRadius:3, backgroundColor:floor.color }}/>
+                <span style={{ fontSize:13, fontWeight:700, color:floor.dark }}>{floor.colorName}</span>
+              </div>
+              <StatusChip statusKey={overall} large/>
+              <span style={{ fontSize:11, color:C.textLight, fontFamily:C.fMono }}>
+                F{floor.num}-U{unitId}
+              </span>
+            </div>
+          </div>
+        </div>
+        {/* Per-item labels grouped by category */}
+        {Object.entries(MILLWORK).map(([cat, catI]) => (
+          <div key={cat} style={{ marginBottom:18 }}>
+            <div style={{ fontSize:11, fontWeight:700, letterSpacing:"0.16em",
+                          textTransform:"uppercase", color:C.textLight,
+                          fontFamily:C.fMono, marginBottom:8 }}>{cat}</div>
+            {catI.map((item, idx) => {
+              const ph   = PHASES[item.phase];
+              const code = buildCode(floor.num, unitId, item.id, idx+1);
+              const st   = items[item.id] || "pending";
+              return (
+                <div key={item.id} style={{
+                  borderRadius:12, overflow:"hidden",
+                  border:`1.5px solid ${floor.color}35`, marginBottom:7,
+                }}>
+                  <div style={{ height:3, backgroundColor:floor.color }}/>
+                  <div style={{
+                    display:"flex", alignItems:"center", justifyContent:"space-between",
+                    padding:"11px 14px", backgroundColor:C.surface, gap:8,
+                  }}>
+                    <div style={{ flex:1, minWidth:0 }}>
+                      <div style={{ fontSize:10, fontWeight:700, letterSpacing:"0.14em",
+                                    color:floor.color, fontFamily:C.fMono }}>
+                        FLOOR {floor.num} · UNIT {unitId}
+                      </div>
+                      <div style={{
+                        fontSize:15, fontWeight:700, color:C.text, margin:"2px 0 2px",
+                        whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis",
+                      }}>
+                        {cat} — {item.label}
+                      </div>
+                      <div style={{ fontSize:10, color:C.textLight, fontFamily:C.fMono }}>
+                        {ph.label} · SEQ {String(idx+1).padStart(3,"0")} · {code}
+                      </div>
+                    </div>
+                    <StatusChip statusKey={st}/>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+</div>
+```
+
+);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MAIN APP
+// ═══════════════════════════════════════════════════════════════
+export default function App() {
+
+useEffect(() => {
+if (typeof document === “undefined”) return;
+
+```
+// Fonts  -  preconnect first to reduce FOUT
+if (!document.getElementById("fm-preconnect")) {
+  const pc = document.createElement("link");
+  pc.id = "fm-preconnect"; pc.rel = "preconnect";
+  pc.href = "https://fonts.gstatic.com"; pc.crossOrigin = "anonymous";
+  document.head.insertBefore(pc, document.head.firstChild);
+}
+if (!document.getElementById("fm-fonts")) {
+  const link = document.createElement("link");
+  link.id = "fm-fonts"; link.rel = "stylesheet";
+  link.href = "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap";
+  document.head.appendChild(link);
+}
+
+if (!document.getElementById("fm-styles")) {
+  const style = document.createElement("style");
+  style.id = "fm-styles";
+  style.textContent = `
+    .hide-scroll::-webkit-scrollbar { display: none; }
+    .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+    .safe-nav { padding-bottom: max(12px, env(safe-area-inset-bottom, 12px)) !important; }
+  `;
+  document.head.appendChild(style);
+}
+```
+
+}, []);
+
+const [view, setView]                   = useState(“plan”);
+const [activeFloor, setActiveFloor]     = useState(2);
+const [selectedUnit, setSelectedUnit]   = useState(null);
+const [drawerOpen, setDrawerOpen]       = useState(false);
+const [unitData, setUnitData]           = useState({});
+const [filterFloor, setFilterFloor]     = useState(“all”);
+const [filterStatus, setFilterStatus]   = useState(“all”);
+const [searchQ, setSearchQ]             = useState(””);
+const [lblFloor, setLblFloor]           = useState(null);
+const [lblUnit, setLblUnit]             = useState(null);
+const [lblCat, setLblCat]               = useState(“Kitchen”);
+const [lblItems, setLblItems]           = useState([]);
+
+const floor = FLOORS.find(f => f.id === activeFloor) || FLOORS[1];
+
+// getUD and setUD  -  useCallback with correct deps
+const getUD = useCallback(id => unitData[id] || {}, [unitData]);
+const setUD = useCallback((id, d) => setUnitData(p => ({ …p, [id]:d })), []);
+
+const openUnit = useCallback(id => {
+const f = floorOfUnit(id);
+if (!f) return;
+setSelectedUnit(id);
+setActiveFloor(f.id);
+setDrawerOpen(true);
+}, []);
+
+const closeDrawer = useCallback(() => {
+setDrawerOpen(false);
+setSelectedUnit(null);
+}, []);
+
+const statsPerFloor = useMemo(() =>
+RESIDENTIAL_FLOORS.map(f => ({
+…f,
+done: f.units.filter(u => getUD(u).overall === “installed”).length,
+prog: f.units.filter(u => [“staged”,“delivered”].includes(getUD(u).overall)).length,
+miss: f.units.filter(u => getUD(u).overall === “missing”).length,
+pct:  f.units.length
+? Math.round(f.units.filter(u => getUD(u).overall === “installed”).length / f.units.length * 100)
+: 0,
+}))
+, [unitData, getUD]);
+
+const totalDone = statsPerFloor.reduce((s, f) => s + f.done, 0);
+const totalMiss = statsPerFloor.reduce((s, f) => s + f.miss, 0);
+
+const unitDoneCounts = useMemo(() => {
+const counts = {};
+RESIDENTIAL_FLOORS.forEach(f => {
+f.units.forEach(id => {
+const items = getUD(id).items || {};
+counts[id] = ALL_ITEMS.filter(i => items[i.id] === “installed”).length;
+});
+});
+return counts;
+}, [unitData, getUD]);
+
+const trackerUnits = useMemo(() => {
+let list = RESIDENTIAL_FLOORS.flatMap(f => f.units.map(u => ({ id:u, floor:f })));
+if (filterFloor !== “all”) list = list.filter(({ floor:f }) => f.id === +filterFloor);
+if (filterStatus !== “all”) list = list.filter(({ id }) => (getUD(id).overall||“pending”) === filterStatus);
+if (searchQ) list = list.filter(({ id }) => String(id).includes(searchQ));
+return list;
+}, [filterFloor, filterStatus, searchQ, unitData, getUD]);
+
+const NAV = [
+{ id:“plan”,      icon:“⊞”, label:“Plan”     },
+{ id:“dashboard”, icon:“◈”, label:“Overview”  },
+{ id:“tracker”,   icon:“≡”, label:“Tracker”   },
+{ id:“labels”,    icon:“⊡”, label:“Labels”    },
+{ id:“staging”,   icon:“⊳”, label:“Staging”   },
+];
+
+// ── Floor tab progress (memoised, not re-run on every render)
+const floorTabDone = useMemo(() => {
+const map = {};
+RESIDENTIAL_FLOORS.forEach(f => {
+map[f.id] = f.units.filter(u => getUD(u).overall === “installed”).length;
+});
+return map;
+}, [unitData, getUD]);
+
+return (
+
+```
+<div style={{
+  height:"100vh",
+  display:"flex", flexDirection:"column",
+  backgroundColor:C.bg, fontFamily:C.fBody, color:C.text, overflow:"hidden",
+}}>
+
+  {/* ══════════════════════════════════════════════
+      BRANDED HEADER
+  ══════════════════════════════════════════════ */}
+  <header style={{
+    flexShrink:0, backgroundColor:C.surface,
+    borderBottom:`1.5px solid ${C.borderMid}`, zIndex:20,
+  }}>
+    {/* Logo + title row */}
+    <div style={{
+      display:"flex", alignItems:"center",
+      padding:"10px 14px 8px", gap:10, minWidth:0,
+    }}>
+      
+      <LogoSlot key="owner"     src={BRANDING.ownerLogo}     name={BRANDING.ownerName}/>
+      <div style={{ flex:1, textAlign:"center", minWidth:0, padding:"0 2px" }}>
+        <div style={{
+          fontSize:16, fontWeight:800, color:C.text, fontFamily:C.fDisplay,
+          letterSpacing:"-0.2px", lineHeight:1.2,
+          whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis",
+        }}>{BRANDING.projectName}</div>
+        <div style={{
+          fontSize:10, fontWeight:600, color:C.textLight,
+          letterSpacing:"0.08em", marginTop:2, fontFamily:C.fDisplay, whiteSpace:"nowrap",
+        }}>{BRANDING.appName}</div>
+      </div>
+      <LogoSlot key="installer" src={BRANDING.installerLogo} name={BRANDING.installerName}/>
+    </div>
+
+    {/* Stats strip */}
+    <div style={{
+      display:"flex", justifyContent:"space-between", alignItems:"center",
+      padding:"5px 18px 6px", borderTop:`1px solid ${C.border}`,
+    }}>
+      <div style={{ display:"flex", gap:18 }}>
+        {[
+          { n:90,        label:"Units",     color:C.text },
+          { n:totalDone, label:"Installed", color:"#15803D" },
+          { n:totalMiss, label:"Issues",    color:totalMiss>0?"#DC2626":C.textLight },
+        ].map((s, i) => (
+          <div key={i} style={{ display:"flex", alignItems:"baseline", gap:4 }}>
+            <span style={{ fontSize:20, fontWeight:800, fontFamily:C.fMono, lineHeight:1, color:s.color }}>
+              {s.n}
+            </span>
+            <span style={{ fontSize:10, fontWeight:600, color:C.textLight, letterSpacing:"0.06em" }}>
+              {s.label}
+            </span>
+          </div>
+        ))}
+      </div>
+      <div style={{ fontSize:10, color:C.textLight, fontFamily:C.fMono }}>{BRANDING.location}</div>
+    </div>
+
+    {/* Floor tabs — plan view only */}
+    {view === "plan" && (
+
+      <div className="hide-scroll" style={{
+        display:"flex", gap:2, padding:"0 10px",
+        overflowX:"auto", scrollbarWidth:"none",
+        borderTop:`1px solid ${C.border}`,
+      }}>
+        {RESIDENTIAL_FLOORS.map(f => {
+          const done  = floorTabDone[f.id] || 0;
+          const isAct = activeFloor === f.id;
+          return (
+            <button
+              key={f.id}
+              type="button"
+              onClick={() => { setActiveFloor(f.id); closeDrawer(); }}
+              style={{
+                flexShrink:0, display:"flex", flexDirection:"column",
+                alignItems:"center", padding:"7px 11px 5px",
+                cursor:"pointer", border:"none",
+                backgroundColor: isAct ? f.light : "transparent",
+                borderBottom: `3px solid ${isAct ? f.color : "transparent"}`,
+                transition:"all 0.15s",
+              }}
+            >
+              <div style={{ display:"flex", alignItems:"center", gap:5, marginBottom:2 }}>
+                <div style={{ width:9, height:9, borderRadius:"50%", backgroundColor:f.color }}/>
+                <span style={{ fontSize:13, fontWeight:700, fontFamily:C.fDisplay,
+                               color:isAct?f.dark:C.textMid }}>{f.label}</span>
+              </div>
+              <span style={{ fontSize:10, fontFamily:C.fMono, color:isAct?f.color:C.textLight }}>
+                {done}/{f.units.length}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    )}
+  </header>
+
+  {/* ══════════════════════════════════════════════
+      MAIN CONTENT
+  ══════════════════════════════════════════════ */}
+  <div style={{ flex:1, overflow:"hidden", position:"relative", display:"flex" }}>
+
+    {/* PLAN */}
+    {view === "plan" && (
+      <div style={{ flex:1, display:"flex", flexDirection:"column", overflow:"hidden" }}>
+        <div style={{
+          flexShrink:0, display:"flex", alignItems:"center", gap:12,
+          padding:"10px 16px", borderBottom:`1px solid ${C.border}`,
+          backgroundColor:C.surface,
+        }}>
+          <Badge floor={floor} size="md"/>
+          <div style={{ flex:1 }}>
+            <div style={{ fontSize:16, fontWeight:700, color:C.text }}>
+              {floor.label} Floor — {floor.units.length} Residential Units
+            </div>
+            <div style={{ fontSize:12, color:C.textLight, marginTop:2 }}>{floor.notes}</div>
+          </div>
+        </div>
+        <div style={{ flex:1, overflowY:"auto", padding:14 }}>
+          <FloorPlanCanvas
+            floor={floor}
+            unitData={unitData}
+            selectedUnit={selectedUnit}
+            onSelect={openUnit}
+          />
+          {!selectedUnit && (
+            <div style={{ textAlign:"center", fontSize:13, color:C.textLight,
+                          fontFamily:C.fMono, marginTop:10 }}>
+              Tap any unit marker to open details
+            </div>
+          )}
+          {/* Status legend */}
+          <div style={{ marginTop:16, borderRadius:16, border:`1.5px solid ${C.border}`,
+                        backgroundColor:C.surface, overflow:"hidden" }}>
+            <div style={{ padding:"10px 16px", borderBottom:`1px solid ${C.border}`,
+                          fontSize:11, fontFamily:C.fMono, letterSpacing:"0.18em",
+                          color:C.textLight, textTransform:"uppercase" }}>
+              Status Legend
+            </div>
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)" }}>
+              {Object.entries(STATUSES).map(([k, s]) => (
+                <div key={k} style={{ display:"flex", alignItems:"center", gap:8,
+                                     padding:"11px 14px", borderBottom:`1px solid ${C.border}` }}>
+                  <span style={{ fontSize:18, color:s.color, lineHeight:1 }}>{s.dot}</span>
+                  <span style={{ fontSize:13, fontWeight:600, color:C.textMid }}>{s.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {/* DASHBOARD */}
+    {view === "dashboard" && (
+      <div style={{ flex:1, overflowY:"auto", padding:16 }}>
+        <SectionTitle text="Project Overview"/>
+        <div style={{ fontSize:30, fontWeight:800, fontFamily:C.fDisplay,
+                      marginBottom:18, lineHeight:1 }}>All Floors</div>
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:10, marginBottom:20 }}>
+          {[
+            { n:90,        label:"Total",     color:C.text      },
+            { n:totalDone, label:"Installed", color:"#15803D"   },
+            { n:totalMiss, label:"Issues",    color:totalMiss>0?"#DC2626":C.textLight },
+          ].map((s, i) => (
+            <div key={i} style={{
+              borderRadius:16, border:`1.5px solid ${C.border}`,
+              backgroundColor:C.surface, padding:"16px 8px", textAlign:"center",
+            }}>
+              <div style={{ fontSize:30, fontWeight:800, fontFamily:C.fMono,
+                            color:s.color, lineHeight:1 }}>{s.n}</div>
+              <div style={{ fontSize:11, fontFamily:C.fMono, color:C.textLight,
+                            textTransform:"uppercase", letterSpacing:"0.12em", marginTop:4 }}>
+                {s.label}
+              </div>
+            </div>
+          ))}
+        </div>
+        {statsPerFloor.map(f => (
+          <button
+            key={f.id}
+            type="button"
+            onClick={() => { setActiveFloor(f.id); setView("plan"); }}
+            style={{
+              width:"100%", textAlign:"left", borderRadius:18,
+              border:`1.5px solid ${C.border}`, backgroundColor:C.surface,
+              overflow:"hidden", cursor:"pointer", marginBottom:10,
+            }}
+          >
+            <div style={{ height:4, backgroundColor:f.color }}/>
+            <div style={{ padding:"14px 16px" }}>
+              <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:10 }}>
+                <Badge floor={f} size="md"/>
+                <div style={{ flex:1 }}>
+                  <div style={{ display:"flex", justifyContent:"space-between" }}>
+                    <span style={{ fontSize:17, fontWeight:800, color:C.text }}>
+                      {f.label} Floor
+                    </span>
+                    <span style={{ fontSize:14, fontWeight:700, color:f.color, fontFamily:C.fMono }}>
+                      {f.pct}%
+                    </span>
+                  </div>
+                  <div style={{ fontSize:13, color:C.textLight, marginTop:2 }}>
+                    {f.units.length} residential units
+                  </div>
+                </div>
+              </div>
+              <div style={{ height:5, borderRadius:5, backgroundColor:f.color+"22", overflow:"hidden" }}>
+                <div style={{ height:"100%", width:`${f.pct}%`, backgroundColor:f.color,
+                              borderRadius:5, transition:"width 0.5s" }}/>
+              </div>
+              <div style={{ display:"flex", gap:14, marginTop:8 }}>
+                {f.done>0  && <span style={{fontSize:12,fontFamily:C.fMono,color:"#15803D",fontWeight:700}}>● {f.done} installed</span>}
+                {f.prog>0  && <span style={{fontSize:12,fontFamily:C.fMono,color:"#B45309",fontWeight:700}}>◉ {f.prog} active</span>}
+                {f.miss>0  && <span style={{fontSize:12,fontFamily:C.fMono,color:"#DC2626",fontWeight:700}}>◻ {f.miss} missing</span>}
+                {!f.done && !f.prog && !f.miss &&
+                  <span style={{fontSize:12,fontFamily:C.fMono,color:C.textLight}}>○ not started</span>}
+              </div>
+            </div>
+          </button>
+        ))}
+        <div style={{ borderRadius:16, border:`1.5px solid ${C.border}`,
+                      backgroundColor:C.surface, overflow:"hidden", marginTop:4 }}>
+          <div style={{ padding:"10px 16px", borderBottom:`1px solid ${C.border}`,
+                        fontSize:11, fontFamily:C.fMono, letterSpacing:"0.18em",
+                        color:C.textLight, textTransform:"uppercase" }}>
+            Floor Colour System
+          </div>
+          {FLOORS.map(f => (
+            <div key={f.id} style={{
+              display:"flex", alignItems:"center", gap:12, padding:"12px 16px",
+              borderBottom:`1px solid ${C.border}`,
+            }}>
+              <div style={{ width:18, height:18, borderRadius:5,
+                            backgroundColor:f.color, flexShrink:0 }}/>
+              <span style={{ fontSize:15, fontWeight:600, flex:1, color:C.text }}>
+                Floor {f.num} — {f.label}
+              </span>
+              <span style={{ fontSize:13, fontWeight:700, color:f.color, fontFamily:C.fMono }}>
+                {f.colorName}
+              </span>
+              <span style={{ fontSize:12, color:C.textLight, fontFamily:C.fMono }}>
+                {f.units.length} units
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+
+    {/* TRACKER */}
+    {view === "tracker" && (
+      <div style={{ flex:1, display:"flex", flexDirection:"column", overflow:"hidden" }}>
+        <div style={{ flexShrink:0, padding:"16px 16px 12px",
+                      borderBottom:`1px solid ${C.border}`, backgroundColor:C.surface }}>
+          <SectionTitle text="Installation"/>
+          <div style={{ fontSize:26, fontWeight:800, fontFamily:C.fDisplay,
+                        marginBottom:12, lineHeight:1 }}>Unit Tracker</div>
+          <div style={{ display:"flex", gap:8, marginBottom:8 }}>
+            
+            <select
+              value={filterFloor}
+              onChange={e => setFilterFloor(e.target.value)}
+              aria-label="Filter by floor"
+              style={{ ...INPUT_ST, flex:1, padding:"10px 12px" }}
+            >
+              <option value="all">All Floors</option>
+              {RESIDENTIAL_FLOORS.map(f => (
+                <option key={f.id} value={f.id}>{f.label}</option>
+              ))}
+            </select>
+            <select
+              value={filterStatus}
+              onChange={e => setFilterStatus(e.target.value)}
+              aria-label="Filter by status"
+              style={{ ...INPUT_ST, flex:1, padding:"10px 12px" }}
+            >
+              <option value="all">All Status</option>
+              {Object.entries(STATUSES).map(([k, s]) => (
+                <option key={k} value={k}>{s.label}</option>
+              ))}
+            </select>
+          </div>
+          <input
+            value={searchQ}
+            onChange={e => setSearchQ(e.target.value)}
+            placeholder="Search unit number..."
+            aria-label="Search units"
+            style={INPUT_ST}
+          />
+        </div>
+        <div style={{ flex:1, overflowY:"auto", padding:"12px 14px 80px" }}>
+          <div style={{ fontSize:12, fontFamily:C.fMono, color:C.textLight, marginBottom:10 }}>
+            {trackerUnits.length} of {TOTAL_UNITS} units shown
+          </div>
+          {trackerUnits.map(({ id, floor:f }) => {
+            const st    = getUD(id).overall || "pending";
+            const stObj = STATUSES[st] || STATUSES.pending;
+
+            const done  = unitDoneCounts[id] || 0;
+            return (
+              <div
+                key={id}
+                onClick={() => openUnit(id)}
+                role="button"
+                tabIndex={0}
+                aria-label={`Open unit ${id}`}
+                onKeyDown={e => { if (e.key==="Enter"||e.key===" ") openUnit(id); }}
+                style={{
+                  display:"flex", alignItems:"center", gap:12, padding:"14px 14px",
+                  borderRadius:16, border:`1.5px solid ${C.border}`,
+                  backgroundColor:C.surface, marginBottom:8, cursor:"pointer",
+                }}
+              >
+                <Badge floor={f} size="sm"/>
+                <div style={{ flex:1, minWidth:0 }}>
+                  <div style={{ fontSize:18, fontWeight:800, color:C.text, lineHeight:1 }}>
+                    Unit {id}
+                  </div>
+                  <div style={{ fontSize:12, color:C.textLight, fontFamily:C.fMono, marginTop:3 }}>
+                    {f.label} Floor · {done}/{ALL_ITEMS.length} items
+                  </div>
+                </div>
+                <StatusChip statusKey={st} large/>
+                
+                <select
+                  value={st}
+                  onClick={e => e.stopPropagation()}
+                  onChange={e => setUD(id, { ...getUD(id), overall:e.target.value })}
+                  aria-label={`Set status for unit ${id}`}
+                  style={{
+                    fontSize:11, fontWeight:700, padding:"7px 8px", borderRadius:9,
+                    border:`1.5px solid ${C.border}`, color:C.textMid,
+                    backgroundColor:C.surfaceWarm, fontFamily:C.fMono,
+                    cursor:"pointer", flexShrink:0,
+                  }}
+                >
+                  {Object.entries(STATUSES).map(([k, s]) => (
+                    <option key={k} value={k}>{s.short}</option>
+                  ))}
+                </select>
+              </div>
+            );
+          })}
+          {trackerUnits.length === 0 && (
+            <div style={{ textAlign:"center", padding:"48px 0", fontSize:15, color:C.textLight }}>
+              No units match the current filters
+            </div>
+          )}
+        </div>
+      </div>
+    )}
+
+    {/* LABELS */}
+    {view === "labels" && (
+      <div style={{ flex:1, overflowY:"auto", padding:16 }}>
+        <SectionTitle text="Generator"/>
+        <div style={{ fontSize:26, fontWeight:800, fontFamily:C.fDisplay,
+                      marginBottom:16, lineHeight:1 }}>Field Labels</div>
+        {/* Step 1 — Floor */}
+        <div style={{ borderRadius:16, border:`1.5px solid ${C.border}`,
+                      backgroundColor:C.surface, padding:"16px", marginBottom:12 }}>
+          <SectionTitle text="01 · Select Floor"/>
+          <div style={{ display:"flex", gap:10, flexWrap:"wrap" }}>
+            {RESIDENTIAL_FLOORS.map(f => (
+              <button
+                key={f.id}
+                type="button"
+                onClick={() => { setLblFloor(f); setLblUnit(null); setLblItems([]); }}
+                style={{
+                  width:54, height:54, borderRadius:12, fontFamily:C.fDisplay,
+                  fontWeight:800, fontSize:15, cursor:"pointer",
+                  border:`2.5px solid ${lblFloor?.id===f.id ? f.color : f.color+"40"}`,
+                  backgroundColor: lblFloor?.id===f.id ? f.color : f.light,
+                  color: lblFloor?.id===f.id ? "white" : f.dark,
+                }}
+              >{f.short}</button>
+            ))}
+          </div>
+        </div>
+        {/* Step 2 — Unit */}
+        {lblFloor && (
+          <div style={{ borderRadius:16, border:`1.5px solid ${C.border}`,
+                        backgroundColor:C.surface, padding:"16px", marginBottom:12 }}>
+            <SectionTitle text="02 · Select Unit"/>
+            <div style={{ display:"flex", gap:7, flexWrap:"wrap" }}>
+              {lblFloor.units.map(u => (
+                <button
+                  key={u}
+                  type="button"
+                  onClick={() => { setLblUnit(u); setLblItems([]); }}
+                  style={{
+                    padding:"9px 13px", borderRadius:10, fontFamily:C.fMono,
+                    fontWeight:700, fontSize:13, cursor:"pointer",
+                    border:`2px solid ${lblUnit===u ? lblFloor.color : lblFloor.color+"30"}`,
+                    backgroundColor: lblUnit===u ? lblFloor.color : "white",
+                    color: lblUnit===u ? "white" : lblFloor.dark,
+                  }}
+                >{u}</button>
+              ))}
+            </div>
+          </div>
+        )}
+        {/* Step 3 — Items */}
+        {lblUnit && (
+          <div style={{ borderRadius:16, border:`1.5px solid ${C.border}`,
+                        backgroundColor:C.surface, padding:"16px", marginBottom:12 }}>
+            <SectionTitle text="03 · Select Items"/>
+            
+            <div className="hide-scroll" style={{
+              display:"flex", gap:7, overflowX:"auto",
+              marginBottom:12, scrollbarWidth:"none",
+            }}>
+              {Object.keys(MILLWORK).map(cat => (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => setLblCat(cat)}
+                  style={{
+                    flexShrink:0, fontSize:13, fontWeight:700,
+                    padding:"8px 15px", borderRadius:20, fontFamily:C.fDisplay,
+                    cursor:"pointer",
+                    border:`1.5px solid ${lblCat===cat ? lblFloor.color : C.border}`,
+                    backgroundColor: lblCat===cat ? lblFloor.color : C.surface,
+                    color: lblCat===cat ? "white" : C.textMid,
+                  }}
+                >{cat}</button>
+              ))}
+            </div>
+            {(MILLWORK[lblCat]||[]).map(item => (
+              <label
+                key={item.id}
+                style={{
+                  display:"flex", alignItems:"center", gap:10,
+                  padding:"11px 12px", borderRadius:12,
+                  backgroundColor:C.bg, marginBottom:5, cursor:"pointer",
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={lblItems.includes(item.id)}
+                  onChange={e => setLblItems(p =>
+                    e.target.checked
+                      ? [...p, item.id]
+                      : p.filter(i => i !== item.id)
+                  )}
+                  style={{ width:20, height:20, cursor:"pointer", accentColor:lblFloor.color }}
+                />
+                <span style={{ flex:1, fontSize:16, fontWeight:600, color:C.text }}>
+                  {item.label}
+                </span>
+                <span style={{
+                  fontSize:11, fontWeight:700, padding:"3px 8px", borderRadius:6,
+                  backgroundColor:PHASES[item.phase].color+"18",
+                  color:PHASES[item.phase].color, fontFamily:C.fMono,
+                }}>Ph.{item.phase}</span>
+              </label>
+            ))}
+            <button
+              type="button"
+              onClick={() => setLblItems(ALL_ITEMS.map(i => i.id))}
+              style={{
+                fontSize:13, fontWeight:700, color:C.textLight,
+                textDecoration:"underline", background:"none",
+                border:"none", cursor:"pointer", marginTop:6,
+              }}
+            >Select All Items</button>
+          </div>
+        )}
+        {/* Generated labels */}
+        {lblFloor && lblUnit && lblItems.length > 0 && (
+          <div style={{ marginBottom:80 }}>
+            <SectionTitle text={`Generated — ${lblItems.length} items · Unit ${lblUnit}`}/>
+            {lblItems.map((itemId, i) => {
+              const item = ALL_ITEMS.find(it => it.id === itemId);
+              if (!item) return null;
+              const ph   = PHASES[item.phase];
+              const code = buildCode(lblFloor.num, lblUnit, item.id, i+1);
+              return (
+                <div key={itemId} style={{
+                  borderRadius:14, overflow:"hidden",
+                  border:`2.5px solid ${lblFloor.color}`, marginBottom:12,
+                }}>
+                  <div style={{
+                    backgroundColor:lblFloor.color, padding:"9px 16px",
+                    textAlign:"center", color:"white", fontFamily:C.fMono,
+                    fontWeight:700, fontSize:13, letterSpacing:"0.13em",
+                  }}>
+                    ▬ {lblFloor.label.toUpperCase()} FLOOR — {lblFloor.colorName.toUpperCase()} ▬
+                  </div>
+                  <div style={{ backgroundColor:C.surface, padding:"14px 16px" }}>
+                    <div style={{ fontSize:38, fontWeight:800, textAlign:"center",
+                                  fontFamily:C.fDisplay, color:C.text, lineHeight:1 }}>
+                      UNIT {lblUnit}
+                    </div>
+                    <div style={{ textAlign:"center", fontSize:15, fontWeight:600,
+                                  color:C.textMid, margin:"5px 0 3px" }}>
+                      {item.cat.toUpperCase()} — {item.label.toUpperCase()}
+                    </div>
+                    <div style={{
+                      borderTop:`1px dashed ${C.border}`, marginTop:10, paddingTop:8,
+                      display:"flex", justifyContent:"space-between", alignItems:"center",
+                      fontSize:11, fontFamily:C.fMono, flexWrap:"wrap", gap:4,
+                    }}>
+                      <span style={{ color:ph.color, fontWeight:700 }}>{ph.label}</span>
+                      <span style={{ color:C.textLight }}>SEQ {String(i+1).padStart(3,"0")}</span>
+                      <span style={{ color:C.textLight }}>{code}</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    )}
+
+    {/* STAGING */}
+    {view === "staging" && (
+      <div style={{ flex:1, overflowY:"auto", padding:16 }}>
+        <SectionTitle text="Delivery"/>
+        <div style={{ fontSize:26, fontWeight:800, fontFamily:C.fDisplay,
+                      marginBottom:16, lineHeight:1 }}>Staging Guide</div>
+        <div style={{ borderRadius:16, border:`1.5px solid ${C.border}`,
+                      backgroundColor:C.surface, overflow:"hidden", marginBottom:14 }}>
+          <div style={{ padding:"10px 16px", borderBottom:`1px solid ${C.border}`,
+                        fontSize:11, fontFamily:C.fMono, letterSpacing:"0.18em",
+                        color:C.textLight, textTransform:"uppercase" }}>
+            Delivery Phases
+          </div>
+          {Object.entries(PHASES).map(([n, ph]) => (
+            <div key={n} style={{ display:"flex", alignItems:"center", gap:12,
+                                  padding:"12px 16px", borderBottom:`1px solid ${C.border}` }}>
+              <div style={{
+                width:40, height:40, borderRadius:10, backgroundColor:ph.color,
+                color:"white", display:"flex", alignItems:"center", justifyContent:"center",
+                fontFamily:C.fMono, fontWeight:800, fontSize:17, flexShrink:0,
+              }}>{n}</div>
+              <div>
+                <div style={{ fontSize:15, fontWeight:700, color:C.text }}>{ph.label}</div>
+                <div style={{ fontSize:13, color:C.textLight, marginTop:2 }}>{ph.desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+        {RESIDENTIAL_FLOORS.map(f => (
+          <div key={f.id} style={{ borderRadius:18, border:`1.5px solid ${C.border}`,
+                                   backgroundColor:C.surface, overflow:"hidden", marginBottom:12 }}>
+            <div style={{ height:4, backgroundColor:f.color }}/>
+            <div style={{ display:"flex", alignItems:"center", gap:12, padding:"14px 16px",
+                          borderBottom:`1px solid ${C.border}` }}>
+              <Badge floor={f} size="md"/>
+              <div style={{ flex:1 }}>
+                <div style={{ fontSize:17, fontWeight:800, color:C.text }}>{f.label} Floor</div>
+                <div style={{ fontSize:12, color:C.textLight, fontFamily:C.fMono, marginTop:1 }}>
+                  Units {Math.min(...f.units)}–{Math.max(...f.units)} · {f.units.length} units
+                </div>
+              </div>
+              <div style={{ width:22, height:22, borderRadius:6, backgroundColor:f.color }}/>
+            </div>
+            <div style={{ padding:"12px 16px" }}>
+              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:12 }}>
+                {[
+                  ["Pallet Colour", f.colorName],
+                  ["Unit Range", `${Math.min(...f.units)}–${Math.max(...f.units)}`],
+                ].map(([k, v]) => (
+                  <div key={k} style={{ borderRadius:12, backgroundColor:C.bg, padding:"10px 12px" }}>
+                    <div style={{ fontSize:9, fontFamily:C.fMono, letterSpacing:"0.14em",
+                                  color:C.textLight, textTransform:"uppercase", marginBottom:4 }}>
+                      {k}
+                    </div>
+                    <div style={{ fontSize:17, fontWeight:800, color:C.text, fontFamily:C.fDisplay }}>
+                      {v}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ borderRadius:12, backgroundColor:C.bg, padding:"12px 14px" }}>
+                <div style={{ fontSize:14, fontWeight:700, color:C.text, marginBottom:7 }}>
+                  Staging Instructions
+                </div>
+                {[
+                  `Unload via ${f.id===2 ? "street / lobby level" : `elevator — Floor ${f.id}`}`,
+                  "Sort by unit number before staging on floor",
+                  "Phase 1 items first, then Phase 2, then Phase 3",
+                  "Hardware boxes: label with unit — never mix floors",
+                ].map((t, i) => (
+                  <div key={i} style={{ fontSize:13, color:C.textMid, marginBottom:4,
+                                       paddingLeft:4, lineHeight:1.45 }}>· {t}</div>
+                ))}
+              </div>
+            </div>
+          </div>
+        ))}
+        <div style={{ borderRadius:18, border:`1.5px solid ${C.border}`,
+                      backgroundColor:C.surface, overflow:"hidden", marginBottom:24 }}>
+          <div style={{ padding:"10px 16px", borderBottom:`1px solid ${C.border}`,
+                        fontSize:11, fontFamily:C.fMono, letterSpacing:"0.18em",
+                        color:C.textLight, textTransform:"uppercase" }}>
+            Delivery Checklist
+          </div>
+          {[
+            "Verify pallet colour matches floor colour code",
+            "Confirm unit number on every package before staging",
+            "Separate Phase 1 / Phase 2 / Phase 3 items",
+            "Hardware boxes: label with unit — do not mix floors",
+            "Flag damaged items immediately as ◻ Missing Material",
+            "Photograph staged floor area before installation begins",
+            "Sign delivery manifest per floor",
+          ].map((item, i) => (
+            <div key={i} style={{ display:"flex", alignItems:"flex-start", gap:12,
+                                  padding:"11px 16px", borderBottom:`1px solid ${C.border}` }}>
+              <div style={{ width:22, height:22, borderRadius:5,
+                            border:`2px solid ${C.borderMid}`, flexShrink:0, marginTop:1 }}/>
+              <span style={{ fontSize:14, color:C.textMid, lineHeight:1.45 }}>{item}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+
+    <div style={{
+      position:"absolute", top:0, bottom:0, right:0, zIndex:30,
+
+      width: drawerOpen ? "100%" : 0,
+      maxWidth: drawerOpen ? 430 : 0,
+      transition:"width 0.28s cubic-bezier(0.4,0,0.2,1), max-width 0.28s cubic-bezier(0.4,0,0.2,1)",
+      boxShadow: drawerOpen ? "-16px 0 50px rgba(0,0,0,0.15)" : "none",
+      overflow:"hidden",
+    }}>
+      
+      {drawerOpen && selectedUnit && floorOfUnit(selectedUnit) && (
+
+        <UnitDrawer
+          key={selectedUnit}
+          unitId={selectedUnit}
+          floor={floorOfUnit(selectedUnit)}
+          data={getUD(selectedUnit)}
+          onUpdate={d => setUD(selectedUnit, d)}
+          onClose={closeDrawer}
+        />
+      )}
+    </div>
+
+    {/* Backdrop */}
+    {drawerOpen && (
+      <div
+        style={{ position:"absolute", top:0, right:0, bottom:0, left:0,
+                 zIndex:29, backgroundColor:"rgba(0,0,0,0.32)" }}
+        onClick={closeDrawer}
+        role="button"
+        aria-label="Close drawer"
+        tabIndex={-1}
+      />
+    )}
+  </div>
+
+  
+  <nav
+    className="safe-nav"
+    style={{
+      flexShrink:0, backgroundColor:C.surface,
+      borderTop:`1.5px solid ${C.borderMid}`,
+      display:"flex", padding:"6px 8px 12px",
+      boxShadow:"0 -4px 28px rgba(0,0,0,0.09)", zIndex:20,
+    }}
+  >
+    {NAV.map(n => {
+      const act = view === n.id;
+      return (
+        <button
+          key={n.id}
+          type="button"
+          onClick={() => { setView(n.id); if (n.id !== "plan") closeDrawer(); }}
+          aria-label={n.label}
+          aria-current={act ? "page" : undefined}
+          style={{
+            flex:1, display:"flex", flexDirection:"column", alignItems:"center",
+            padding:"9px 4px 7px", borderRadius:14, border:"none", cursor:"pointer",
+            backgroundColor: act ? C.text : "transparent",
+            color: act ? "white" : C.textLight, transition:"all 0.15s",
+          }}
+        >
+          <span style={{ fontSize:20, lineHeight:1, fontFamily:C.fMono }}>{n.icon}</span>
+          <span style={{ fontSize:11, fontWeight:700, marginTop:3, letterSpacing:"0.08em",
+                         fontFamily:C.fDisplay, textTransform:"uppercase" }}>{n.label}</span>
+        </button>
+      );
+    })}
+  </nav>
+</div>
+```
+
+);
+}
